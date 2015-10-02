@@ -1,3 +1,4 @@
+package com.github.tmcallaghan.sysbench_mongodb;
 //import com.mongodb.Mongo;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -110,9 +111,6 @@ public class jmongosysbenchexecute {
         WriteConcern myWC = new WriteConcern();
         if (myWriteConcern.toLowerCase().equals("fsync_safe")) {
             myWC = WriteConcern.FSYNC_SAFE;
-        }
-        else if ((myWriteConcern.toLowerCase().equals("none"))) {
-            myWC = WriteConcern.NONE;
         }
         else if ((myWriteConcern.toLowerCase().equals("normal"))) {
             myWC = WriteConcern.NORMAL;
@@ -286,7 +284,6 @@ public class jmongosysbenchexecute {
 
                 // if TokuMX, lock onto current connection (do not pool)
                 if (bIsTokuMX && !auto_commit) {
-                    db.requestStart();
                     db.command("beginTransaction");
                 }
 
@@ -294,10 +291,6 @@ public class jmongosysbenchexecute {
                 DBCollection coll = db.getCollection(collectionName);
 
                 try {
-                    if (bIsTokuMX && !auto_commit) {
-                        // make sure a connection is available, given that we are not pooling
-                        db.requestEnsureConnection();
-                    }
 
                     for (int i=1; i <= oltpPointSelects; i++) {
                         //for i=1, oltp_point_selects do
@@ -464,7 +457,7 @@ public class jmongosysbenchexecute {
                         int startId = rand.nextInt(numMaxInserts)+1;
 
                         WriteResult wrRemove = coll.remove(new BasicDBObject("_id", startId));
-
+                        
                         //c_val = sb_rand_str([[###########-###########-###########-###########-###########-###########-###########-###########-###########-###########]])
                         //pad_val = sb_rand_str([[###########-###########-###########-###########-###########]])
                         //rs = db_query("INSERT INTO " .. table_name ..  " (id, k, c, pad) VALUES " .. string.format("(%d, %d, '%s', '%s')",i, sb_rand(1, oltp_table_size) , c_val, pad_val))
@@ -485,9 +478,8 @@ public class jmongosysbenchexecute {
                 } finally {
                     if (bIsTokuMX && !auto_commit) {
                         // commit the transaction and release current connection in the pool
-                        db.command("commitTransaction");
+                        db.command("commitTransaction");  
                         //--db.command("rollbackTransaction")
-                        db.requestDone();
                     }
                 }
             }

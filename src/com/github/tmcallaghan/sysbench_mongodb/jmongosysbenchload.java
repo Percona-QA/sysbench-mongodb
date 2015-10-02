@@ -1,3 +1,4 @@
+package com.github.tmcallaghan.sysbench_mongodb;
 //import com.mongodb.Mongo;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -73,9 +74,6 @@ public class jmongosysbenchload {
         WriteConcern myWC = new WriteConcern();
         if (myWriteConcern.toLowerCase().equals("fsync_safe")) {
             myWC = WriteConcern.FSYNC_SAFE;
-        }
-        else if ((myWriteConcern.toLowerCase().equals("none"))) {
-            myWC = WriteConcern.NONE;
         }
         else if ((myWriteConcern.toLowerCase().equals("normal"))) {
             myWC = WriteConcern.NORMAL;
@@ -284,7 +282,7 @@ public class jmongosysbenchload {
 
             logMe("Writer thread %d : creating collection %s secondary index",threadNumber, collectionName);
 
-            coll.ensureIndex(new BasicDBObject("k", 1), idxOptions);
+            coll.createIndex(new BasicDBObject("k", 1), idxOptions);
 
             long numInserts = 0;
             int id = 0;
